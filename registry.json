@@ -2,6 +2,19 @@
   "version": 1,
   "plugins": [
     {
+      "id": "ajazz-akp05",
+      "name": "AJAZZ AKP05",
+      "description": "Device driver for the AJAZZ AKP05, AKP05E, and AKP05E Pro macro pads — 10 LCD keys, 4 encoders, touch strip.",
+      "author": "lucatescari",
+      "version": "1.0.0",
+      "type": "device",
+      "tags": ["device", "driver", "ajazz", "akp05", "macro pad"],
+      "downloadUrl": "plugins/ajazz-akp05/dist/index.js",
+      "homepage": "https://github.com/lucatescari/openinput-plugins",
+      "platforms": ["macos", "windows", "linux"],
+      "permissions": []
+    },
+    {
       "id": "hello-world",
       "name": "Hello World",
       "description": "Example plugin — shows desktop notifications when keys are pressed. A reference implementation for plugin authors.",
@@ -13,6 +26,19 @@
       "homepage": "https://github.com/lucatescari/openinput-plugins",
       "platforms": ["macos", "windows", "linux"],
       "permissions": ["notifications"]
+    },
+    {
+      "id": "example-profile",
+      "name": "Starter Profiles",
+      "description": "Example profile pack — a productivity layout and a media controller layout. A reference for profile plugin authors.",
+      "author": "lucatescari",
+      "version": "1.0.0",
+      "type": "profile",
+      "tags": ["example", "profile", "productivity", "media", "starter"],
+      "downloadUrl": "plugins/example-profile/dist/index.js",
+      "homepage": "https://github.com/lucatescari/openinput-plugins",
+      "platforms": ["macos", "windows", "linux"],
+      "permissions": []
     }
   ]
 }
