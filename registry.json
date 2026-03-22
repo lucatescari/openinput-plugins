@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "plugins": [
+    {
+      "id": "hello-world",
+      "name": "Hello World",
+      "description": "Example plugin — shows desktop notifications.",
+      "author": "lucatescari",
+      "version": "1.0.0",
+      "type": "action",
+      "tags": ["example"],
+      "downloadUrl": "plugins/hello-world/dist/index.js"
+    }
+  ]
+}
