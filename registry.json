@@ -4,12 +4,15 @@
     {
       "id": "hello-world",
       "name": "Hello World",
-      "description": "Example plugin — shows desktop notifications.",
+      "description": "Example plugin — shows desktop notifications when keys are pressed. A reference implementation for plugin authors.",
       "author": "lucatescari",
       "version": "1.0.0",
       "type": "action",
-      "tags": ["example"],
-      "downloadUrl": "plugins/hello-world/dist/index.js"
+      "tags": ["example", "notifications"],
+      "downloadUrl": "plugins/hello-world/dist/index.js",
+      "homepage": "https://github.com/lucatescari/openinput-plugins",
+      "platforms": ["macos", "windows", "linux"],
+      "permissions": ["notifications"]
     }
   ]
 }
