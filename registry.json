@@ -45,7 +45,7 @@
       "name": "Windows Audio Mixer",
       "description": "Control per-app audio volumes from your deck. Press to mute, rotate encoder to adjust volume.",
       "author": "lucatescari",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "type": "action",
       "tags": ["audio", "mixer", "windows", "volume", "per-app"],
       "downloadUrl": "plugins/windows-audio-mixer/dist/index.js",

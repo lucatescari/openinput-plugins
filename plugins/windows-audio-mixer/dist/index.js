@@ -194,21 +194,37 @@ public class AudioMixer {
 }
 `;
 
-function runPowerShell(script) {
+function runPowerShell(script, timeoutMs) {
   return new Promise((resolve, reject) => {
     execFile('powershell.exe', [
-      '-NoProfile', '-NonInteractive', '-Command', script,
-    ], { timeout: 5000 }, (err, stdout, stderr) => {
-      if (err) reject(err);
-      else resolve(stdout.trim());
+      '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script,
+    ], { timeout: timeoutMs || 8000 }, (err, stdout, stderr) => {
+      if (err) {
+        // Include stderr in the error message for better debugging
+        const msg = stderr ? `${err.message} | ${stderr.trim()}` : err.message;
+        reject(new Error(msg));
+      } else {
+        resolve(stdout.trim());
+      }
     });
   });
 }
 
 async function ensureCSharpLoaded() {
   if (csharpLoaded) return;
-  const escaped = CSHARP_TYPE.replace(/'/g, "''");
-  await runPowerShell(`Add-Type -TypeDefinition '${escaped}'`);
+
+  // Write C# source to a temp file to avoid escaping issues
+  const os = require('os');
+  const fs = require('fs');
+  const path = require('path');
+  const tmpFile = path.join(os.tmpdir(), 'openinput-audiomixer.cs');
+  fs.writeFileSync(tmpFile, CSHARP_TYPE, 'utf-8');
+
+  // Compile from file — much more reliable than inline strings
+  await runPowerShell(
+    `Add-Type -Path '${tmpFile.replace(/'/g, "''")}'`,
+    20000, // C# compilation can be slow on first run
+  );
   csharpLoaded = true;
 }
 
@@ -366,7 +382,17 @@ async function pollAndRender() {
     sessions = await getAudioSessions();
   } catch (err) {
     console.error('[audio-mixer] Failed to get audio sessions:', err);
-    await showStatus('Audio Error', String(err).slice(0, 25), '#ef4444');
+    // Show error on key 0 and stderr details on key 1
+    const errStr = String(err.message || err);
+    await showStatus('Error', errStr.slice(0, 30), '#ef4444');
+    // Try to show more detail on key 1 if available
+    if (ctx && ctx.isConnected() && keyCount > 1) {
+      try {
+        const svg = buildStatusSvg(errStr.slice(30, 60) || '(end)', errStr.slice(60, 90) || '', '#ef4444', keyWidth, keyHeight);
+        const buf = await ctx.renderSvg(svg, keyWidth, keyHeight);
+        await ctx.setKeyImage(1, buf);
+      } catch { /* best effort */ }
+    }
     return;
   }
 
@@ -470,7 +496,7 @@ module.exports = {
   id: 'windows-audio-mixer',
   name: 'Windows Audio Mixer',
   description: 'Control per-app audio volumes from your deck. Press to mute, encoder to adjust.',
-  version: '1.2.0',
+  version: '1.3.0',
 
   actions: [
     {
