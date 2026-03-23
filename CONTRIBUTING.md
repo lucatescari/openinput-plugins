@@ -56,7 +56,7 @@ See [`plugins/windows-audio-mixer/`](./plugins/windows-audio-mixer/) for a full 
 
 If you're creating a device driver:
 
-1. Find your device's USB Vendor ID and Product ID (macOS: System Information > USB, Linux: `lsusb`, Windows: Device Manager)
+1. Find your device's USB Vendor ID and Product ID (macOS: System Information > USB, Windows: Device Manager)
 2. Capture HID traffic with [Wireshark](https://www.wireshark.org/) or similar
 3. Implement the full `DeviceProtocol` interface (initialize, heartbeat, brightness, sendImage, parseInput, etc.)
 4. Test with a real device before submitting

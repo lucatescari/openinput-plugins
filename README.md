@@ -24,11 +24,7 @@ To uninstall a plugin, go to the **Installed** tab in the Store and click **Unin
 
 ## Security & trust model
 
-**Plugins run code on your machine.** This is the same trust model used by:
-- [VS Code extensions](https://code.visualstudio.com/docs/editor/extension-marketplace)
-- [Obsidian plugins](https://obsidian.md/plugins)
-- [npm packages](https://www.npmjs.com/)
-- [Homebrew formulas](https://brew.sh/)
+**Plugins run code on your machine.** You install them at your own risk.
 
 Every plugin in this store has been **code-reviewed before publishing**. The review process checks for:
 
@@ -439,7 +435,7 @@ For any plugin type, add an entry to `registry.json`:
   "type": "action",
   "tags": ["relevant", "tags"],
   "downloadUrl": "plugins/your-plugin-id/dist/index.js",
-  "platforms": ["macos", "windows", "linux"],
+  "platforms": ["macos", "windows"],
   "permissions": ["notifications"]
 }
 ```
@@ -456,7 +452,7 @@ For any plugin type, add an entry to `registry.json`:
 | `type` | Yes | `device`, `action`, or `profile` |
 | `tags` | Yes | Searchable keywords |
 | `downloadUrl` | Yes | Path to the JS bundle in this repo |
-| `platforms` | No | `["macos", "windows", "linux"]` — omit for all platforms |
+| `platforms` | No | `["macos", "windows"]` — omit for all platforms |
 | `permissions` | No | What system access your plugin needs |
 | `homepage` | No | Link to docs or source repo |
 | `minAppVersion` | No | Minimum OpenInput version required |

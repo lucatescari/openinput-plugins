@@ -13,7 +13,7 @@ Control per-app audio volumes directly from your deck.
 
 ## Requirements
 
-- **Windows only** — silently disabled on macOS and Linux
+- **Windows only** — silently disabled on macOS
 - OpenInput v1.4.0+ (requires Plugin Context API)
 
 ## How to use

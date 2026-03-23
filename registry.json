@@ -11,7 +11,7 @@
       "tags": ["device", "driver", "ajazz", "akp05", "macro pad"],
       "downloadUrl": "plugins/ajazz-akp05/dist/index.js",
       "homepage": "https://github.com/lucatescari/openinput-plugins",
-      "platforms": ["macos", "windows", "linux"],
+      "platforms": ["macos", "windows"],
       "permissions": []
     },
     {
