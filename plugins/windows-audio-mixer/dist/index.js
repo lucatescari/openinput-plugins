@@ -289,9 +289,8 @@ function buildStatusSvg(line1, line2, color, w, h) {
 async function showStatus(line1, line2, color) {
   if (!ctx || !ctx.isConnected()) return;
   try {
-    const sharp = require('sharp');
     const svg = buildStatusSvg(line1, line2, color || '#60a5fa', keyWidth, keyHeight);
-    const buf = await sharp(Buffer.from(svg)).resize(keyWidth, keyHeight).png().toBuffer();
+    const buf = await ctx.renderSvg(svg, keyWidth, keyHeight);
     await ctx.setKeyImage(0, buf);
   } catch { /* best effort */ }
 }
@@ -301,23 +300,20 @@ async function showStatus(line1, line2, color) {
 async function renderKeys() {
   if (!ctx || !ctx.isConnected() || !active) return;
 
-  const sharp = require('sharp');
   const totalKeys = keyCount;
   if (totalKeys === 0) return;
 
   // Pagination logic
   const hasPrev = page > 0;
   const totalSessions = sessions.length;
-  let slotsForSessions = totalKeys;
-  let startSlot = 0;
+  const slotsForSessions = totalKeys;
 
   // Calculate visible sessions for current page
   const sessionsPerPage = totalKeys - (hasPrev ? 1 : 0);
   const startSession = page === 0
     ? 0
-    : (totalKeys - 1) + (page - 1) * (totalKeys - 2); // First page: N or N-1 slots, subsequent: N-2
+    : (totalKeys - 1) + (page - 1) * (totalKeys - 2);
 
-  // Simpler approach: reserve slots for nav keys
   const hasNext = startSession + sessionsPerPage < totalSessions;
 
   const visibleStart = startSession;
@@ -329,7 +325,7 @@ async function renderKeys() {
   // Prev key
   if (hasPrev) {
     const svg = buildNavSvg('Prev', '◀', keyWidth, keyHeight);
-    const buf = await sharp(Buffer.from(svg)).resize(keyWidth, keyHeight).png().toBuffer();
+    const buf = await ctx.renderSvg(svg, keyWidth, keyHeight);
     await ctx.setKeyImage(keyIdx, buf);
     keyIdx++;
   }
@@ -338,7 +334,7 @@ async function renderKeys() {
   for (const session of visibleSessions) {
     const isSelected = keyIdx === selectedIdx;
     const svg = buildSessionSvg(session, keyWidth, keyHeight, isSelected);
-    const buf = await sharp(Buffer.from(svg)).resize(keyWidth, keyHeight).png().toBuffer();
+    const buf = await ctx.renderSvg(svg, keyWidth, keyHeight);
     await ctx.setKeyImage(keyIdx, buf);
     keyIdx++;
   }
@@ -347,7 +343,7 @@ async function renderKeys() {
   const emptySlots = totalKeys - keyIdx - (hasNext ? 1 : 0);
   for (let i = 0; i < emptySlots; i++) {
     const svg = buildEmptySvg(keyWidth, keyHeight);
-    const buf = await sharp(Buffer.from(svg)).resize(keyWidth, keyHeight).png().toBuffer();
+    const buf = await ctx.renderSvg(svg, keyWidth, keyHeight);
     await ctx.setKeyImage(keyIdx, buf);
     keyIdx++;
   }
@@ -355,7 +351,7 @@ async function renderKeys() {
   // Next key
   if (hasNext) {
     const svg = buildNavSvg('Next', '▶', keyWidth, keyHeight);
-    const buf = await sharp(Buffer.from(svg)).resize(keyWidth, keyHeight).png().toBuffer();
+    const buf = await ctx.renderSvg(svg, keyWidth, keyHeight);
     await ctx.setKeyImage(keyIdx, buf);
     keyIdx++;
   }
@@ -474,7 +470,7 @@ module.exports = {
   id: 'windows-audio-mixer',
   name: 'Windows Audio Mixer',
   description: 'Control per-app audio volumes from your deck. Press to mute, encoder to adjust.',
-  version: '1.1.0',
+  version: '1.2.0',
 
   actions: [
     {
