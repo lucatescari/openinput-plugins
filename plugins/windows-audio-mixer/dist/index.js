@@ -278,6 +278,24 @@ function buildEmptySvg(w, h) {
   </svg>`;
 }
 
+function buildStatusSvg(line1, line2, color, w, h) {
+  return `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#0f172a" rx="6"/>
+    <text x="${w / 2}" y="${h * 0.4}" font-family="Arial,sans-serif" font-size="${h * 0.11}" font-weight="600" fill="${color}" text-anchor="middle">${esc(line1)}</text>
+    <text x="${w / 2}" y="${h * 0.62}" font-family="Arial,sans-serif" font-size="${h * 0.08}" fill="#94a3b8" text-anchor="middle">${esc(line2)}</text>
+  </svg>`;
+}
+
+async function showStatus(line1, line2, color) {
+  if (!ctx || !ctx.isConnected()) return;
+  try {
+    const sharp = require('sharp');
+    const svg = buildStatusSvg(line1, line2, color || '#60a5fa', keyWidth, keyHeight);
+    const buf = await sharp(Buffer.from(svg)).resize(keyWidth, keyHeight).png().toBuffer();
+    await ctx.setKeyImage(0, buf);
+  } catch { /* best effort */ }
+}
+
 // ── Render to device ───────────────────────────────────────────────
 
 async function renderKeys() {
@@ -352,6 +370,7 @@ async function pollAndRender() {
     sessions = await getAudioSessions();
   } catch (err) {
     console.error('[audio-mixer] Failed to get audio sessions:', err);
+    await showStatus('Audio Error', String(err).slice(0, 25), '#ef4444');
     return;
   }
 
@@ -359,6 +378,7 @@ async function pollAndRender() {
     await renderKeys();
   } catch (err) {
     console.error('[audio-mixer] Failed to render:', err);
+    await showStatus('Render Err', String(err).slice(0, 25), '#ef4444');
   }
 }
 
@@ -483,7 +503,17 @@ module.exports = {
   },
 
   async execute(actionId) {
-    if (actionId !== 'mixer' || !ctx || process.platform !== 'win32') return;
+    if (actionId !== 'mixer') return;
+
+    if (!ctx) {
+      console.error('[audio-mixer] No context — initialize() was not called');
+      return;
+    }
+
+    if (process.platform !== 'win32') {
+      await showStatus('Windows', 'Only', '#ef4444');
+      return;
+    }
 
     if (active) {
       // Toggle off
@@ -502,11 +532,17 @@ module.exports = {
     selectedIdx = -1;
     updateLayoutInfo();
 
+    await showStatus('Loading', 'Mixer...', '#60a5fa');
     console.log('[audio-mixer] Mixer activated.');
 
     // Start polling
+    try {
+      await pollAndRender();
+    } catch (err) {
+      await showStatus('Error', String(err).slice(0, 20), '#ef4444');
+      console.error('[audio-mixer] First render failed:', err);
+    }
     pollTimer = setInterval(pollAndRender, 1500);
-    await pollAndRender();
   },
 
   dispose() {
