@@ -36,8 +36,21 @@ Your PR will be reviewed for:
 - **Test on the platforms you declare** — if you list `macos`, make sure it works on macOS
 - **Use the minimum permissions needed** — don't request `shell` if you only need `notifications`
 - **Bundle dependencies** — your `index.js` should be self-contained (use a bundler like esbuild or webpack)
+- **`require('sharp')` is available** — the host app bundles sharp, so you can use it for image processing without bundling it yourself
 - **Semver versioning** — use proper semantic versioning for updates
 - **Include a README** — document what your plugin does and how to use it
+
+## Dynamic plugins (Context API)
+
+Plugins that need to push images to keys or react to input events in real time can use the **Plugin Context API**. The context is passed to `initialize(context)` and provides:
+
+- `context.setKeyImage(keyIndex, pngBuffer)` — push images to the device
+- `context.onKeyDown(cb)` / `context.onEncoderRotate(cb)` — react to input
+- `context.getLayout()` / `context.isConnected()` — check device state
+
+See [`plugins/windows-audio-mixer/`](./plugins/windows-audio-mixer/) for a full example.
+
+**Platform-specific plugins**: If your plugin only works on one OS, check `process.platform` in `initialize()` and return early. Set `platforms` in your registry entry to `["windows"]`, `["macos"]`, etc.
 
 ## Device plugins
 

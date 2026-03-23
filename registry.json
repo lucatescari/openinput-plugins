@@ -24,7 +24,7 @@
       "tags": ["example", "notifications"],
       "downloadUrl": "plugins/hello-world/dist/index.js",
       "homepage": "https://github.com/lucatescari/openinput-plugins",
-      "platforms": ["macos", "windows", "linux"],
+      "platforms": ["macos", "windows"],
       "permissions": ["notifications"]
     },
     {
@@ -37,8 +37,22 @@
       "tags": ["example", "profile", "productivity", "media", "starter"],
       "downloadUrl": "plugins/example-profile/dist/index.js",
       "homepage": "https://github.com/lucatescari/openinput-plugins",
-      "platforms": ["macos", "windows", "linux"],
+      "platforms": ["macos", "windows"],
       "permissions": []
+    },
+    {
+      "id": "windows-audio-mixer",
+      "name": "Windows Audio Mixer",
+      "description": "Control per-app audio volumes from your deck. Press to mute, rotate encoder to adjust volume.",
+      "author": "lucatescari",
+      "version": "1.0.0",
+      "type": "action",
+      "tags": ["audio", "mixer", "windows", "volume", "per-app"],
+      "downloadUrl": "plugins/windows-audio-mixer/dist/index.js",
+      "homepage": "https://github.com/lucatescari/openinput-plugins",
+      "platforms": ["windows"],
+      "permissions": ["shell", "system"],
+      "minAppVersion": "1.4.0"
     }
   ]
 }

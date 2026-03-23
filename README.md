@@ -116,11 +116,98 @@ Plugins run in the Electron main process with full Node.js access:
 - `require('child_process')` — Run system commands
 - `require('fs')` — Read/write files
 - `require('https')` — Make HTTP requests
+- `require('sharp')` — Image processing (available from the host app)
 - Any npm package (bundle it into your `index.js`)
+
+### Plugin Context API
+
+`initialize()` receives a **context** object that gives your plugin safe access to the connected device. This enables dynamic, interactive plugins that can push images to keys and react to input events in real time.
+
+```javascript
+async initialize(context) {
+  // context.pluginId          — your plugin's ID
+  // context.isConnected()     — whether a device is connected
+  // context.getLayout()       — device layout (key count, image size) or null
+  // context.setKeyImage(i, b) — push a PNG buffer to key i
+  // context.onKeyDown(cb)     — listen for key presses (returns unsubscribe fn)
+  // context.onKeyUp(cb)       — listen for key releases
+  // context.onEncoderRotate(cb) — listen for encoder rotation (index, 'cw'|'ccw')
+  // context.onDeviceChange(cb)  — listen for device connect/disconnect
+}
+```
+
+**Backward compatible** — old plugins that don't use the context parameter continue to work unchanged.
+
+#### Context methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `setKeyImage` | `(keyIndex, pngBuffer) => Promise<void>` | Push a PNG image to a key. No-op if disconnected. |
+| `getLayout` | `() => DeviceLayout \| null` | Current device layout (key count, image dimensions) or null |
+| `isConnected` | `() => boolean` | Whether a device is connected |
+| `onKeyDown` | `(cb) => () => void` | Register key-down listener. Returns unsubscribe function. |
+| `onKeyUp` | `(cb) => () => void` | Register key-up listener. Returns unsubscribe function. |
+| `onEncoderRotate` | `(cb) => () => void` | Register encoder rotation listener. `cb(index, 'cw'\|'ccw')` |
+| `onDeviceChange` | `(cb) => () => void` | Register device connect/disconnect listener. `cb(connected)` |
+
+#### Dynamic plugin example
+
+```javascript
+module.exports = {
+  id: 'my-dynamic-plugin',
+  name: 'My Dynamic Plugin',
+  description: 'Updates key images in real time.',
+  version: '1.0.0',
+
+  actions: [{ id: 'activate', name: 'Activate', icon: 'zap', description: 'Start' }],
+
+  async initialize(context) {
+    this._ctx = context;
+    this._unsub = context.onKeyDown((keyIndex) => {
+      console.log(`Key ${keyIndex} pressed`);
+    });
+  },
+
+  async execute(actionId) {
+    if (actionId !== 'activate') return;
+    const sharp = require('sharp');
+    const layout = this._ctx.getLayout();
+    if (!layout?.keys) return;
+
+    const { width, height } = layout.keys.imageSpec;
+    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#1a1625"/>
+      <text x="50%" y="50%" fill="#a78bfa" font-size="14" text-anchor="middle" dominant-baseline="central">Hello!</text>
+    </svg>`;
+    const png = await sharp(Buffer.from(svg)).resize(width, height).png().toBuffer();
+    await this._ctx.setKeyImage(0, png);
+  },
+
+  dispose() {
+    this._unsub?.();
+  },
+};
+```
+
+### Platform-specific plugins
+
+If your plugin only works on one OS, check `process.platform` in `initialize()` and exit early:
+
+```javascript
+async initialize(context) {
+  if (process.platform !== 'win32') {
+    console.log('[my-plugin] Windows only — disabled.');
+    return;
+  }
+  // ... Windows-specific setup
+}
+```
+
+Declare the supported platforms in your `registry.json` entry so users know before installing.
 
 ### Example
 
-See [`plugins/hello-world/`](./plugins/hello-world/) for a complete working example with three actions (Greet, Show Time, Counter).
+See [`plugins/hello-world/`](./plugins/hello-world/) for a simple action plugin with notifications, and [`plugins/windows-audio-mixer/`](./plugins/windows-audio-mixer/) for a dynamic plugin that uses the Context API to render real-time audio controls on deck keys.
 
 ---
 
@@ -400,6 +487,7 @@ All plugins are reviewed before being merged. See [CONTRIBUTING.md](./CONTRIBUTI
 | Plugin | Type | Description |
 |--------|------|-------------|
 | [`hello-world`](./plugins/hello-world/) | Action | Desktop notifications — demonstrates actions, initialize, execute, dispose |
+| [`windows-audio-mixer`](./plugins/windows-audio-mixer/) | Action | Per-app volume control — demonstrates dynamic plugins with the Context API |
 | [`ajazz-akp05`](./plugins/ajazz-akp05/) | Device | AJAZZ AKP05/AKP05E/AKP05E Pro — production device driver with full protocol |
 | [`example-profile`](./plugins/example-profile/) | Profile | Productivity + media profiles — shows the profile schema |
 
