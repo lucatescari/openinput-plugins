@@ -474,7 +474,7 @@ module.exports = {
   id: 'windows-audio-mixer',
   name: 'Windows Audio Mixer',
   description: 'Control per-app audio volumes from your deck. Press to mute, encoder to adjust.',
-  version: '1.0.0',
+  version: '1.1.0',
 
   actions: [
     {
